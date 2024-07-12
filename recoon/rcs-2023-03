@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+using namespace std;
+int levels(vector<int>& dt){
+    sort(dt.begin(),dt.end());
+    if(dt[1]==dt[2]&&dt[2]==dt[3]&&dt[3]==dt[4]&&dt[4]==dt[5]) return 1;
+    else if((dt[1]==dt[2]&&dt[2]==dt[3]&&dt[3]==dt[4])||(dt[2]==dt[3]&&dt[3]==dt[4]&&dt[4]==dt[5])) return 2;
+    else if(((dt[1]==dt[2]&&dt[2]==dt[3])&&(dt[4]==dt[5]))||((dt[3]==dt[4]&&dt[4]==dt[5])&&(dt[1]==dt[2]))) return 3;
+    else if((dt[1]==2&&dt[2]==3&&dt[3]==4&&dt[4]==5&&dt[5]==6)) return 4;
+    else if(dt[1]==1&&dt[2]==2&&dt[3]==3&&dt[4]==4&&dt[5]==5) return 5;
+    else if((dt[1]==dt[2]&&dt[2]==dt[3])||(dt[2]==dt[3]&&dt[3]==dt[4])||(dt[3]==dt[4]&&dt[4]==dt[5])) return 6;
+    else if((dt[1]==dt[2]&&dt[3]==dt[4])||(dt[1]==dt[2]&&dt[4]==dt[5])||(dt[2]==dt[3]&&dt[4]==dt[5])) return 7;
+    else if((dt[1]==dt[2])||dt[2]==dt[3]||dt[3]==dt[4]||dt[4]==dt[5]) return 8;
+    else return 9;
+}
+vector<int> ch[6];
+int counts(int i){
+    int cnts=0,out=0;
+    while(cnts<5){
+        if(i%2==1) out++;
+        i=i>>1; cnts++;
+    }
+    return out;
+}
+void init(){
+    for(int i=0;i<32;i++){
+        int t=counts(i);
+        ch[t].push_back(i);
+    }
+}
+int ckn(vector<int> &dt,int it,int lvn,int nw,vector<int> &dts){
+    int outs=0;
+    if(nw!=6){
+        if(it%2){
+            for(int i=1;i<=6;i++){
+                dts[nw]=i;
+                outs+=ckn(dt,it>>1,lvn,nw+1,dts);
+            }
+        }
+        else{
+            dts[nw]=dt[nw];
+            outs+=ckn(dt,it>>1,lvn,nw+1,dts);
+        }
+        return outs;
+    }
+    else{
+        vector<int> dtss=dts;
+        if(levels(dtss)<lvn) return 1;
+        else return 0;
+    }
+}
+int ck(vector<int>& dt,int i,int lvn){
+    int outs=0;
+    for(auto it:ch[i]){
+        vector<int> dts(6,0);
+        outs=max(outs,ckn(dt,it,lvn,1,dts));
+    }
+    return outs;
+}
+
+int gcd(int a,int b){
+    if(b==0) return a;
+    return gcd(b,a%b);
+}
+int main(){
+    int t; cin>>t;
+    init();
+    while(t--){
+        vector<int> dt; dt.resize(6,0);
+        for(int i=1;i<=5;i++) cin>>dt[i];
+        int larmx=0,larmy=1,nx=0;//6^5
+        int lvn=levels(dt);
+        for(int i=1;i<=5;i++){
+            int outs=ck(dt,i,lvn);
+            int outsy=int(pow(6,i));
+            if(larmx*outsy<outs*larmy){larmx=outs;larmy=outsy;nx=i;}
+        }
+        int gcds=gcd(larmx,larmy);
+        cout<<nx<<' '<<larmx/gcds<<' '<<larmy/gcds<<endl;
+    }
+    return 0;
+}
